@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogiFlow — Controle logístico</title>
+<style>
+:root{
+  --bg:#0d1428;
+  --bg2:#111b35;
+  --panel:#17233b;
+  --panel2:#1b2942;
+  --border:#2b3a55;
+  --text:#f4f7fb;
+  --muted:#9fb0c9;
+  --primary:#6674f4;
+  --cyan:#2eb8db;
+  --green:#22c58b;
+  --yellow:#f5b84b;
+  --red:#ef6675;
+  --shadow:0 20px 60px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:linear-gradient(135deg,#0d1428 0%,#101a32 55%,#0c1427 100%);
+  color:var(--text);
+  min-height:100vh;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* Landing */
+.landing{min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  height:104px;display:flex;align-items:center;justify-content:space-between;
+  width:min(1140px,calc(100% - 48px));margin:auto;
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-icon{
+  width:40px;height:40px;border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#6877f5,#27b9db);
+  box-shadow:0 8px 25px rgba(55,156,225,.25);
+  font-size:20px;
+}
+.brand strong{font-size:14px;display:block}
+.brand span{font-size:12px;color:#94a6c2;display:block;margin-top:3px}
+.login-btn{
+  border:0;color:white;font-weight:700;padding:10px 19px;border-radius:16px;
+  background:linear-gradient(100deg,#6876f4,#27b8d7);
+}
+.hero{
+  width:min(1140px,calc(100% - 48px));margin:25px auto 0;
+  display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center;
+  flex:1;padding-bottom:65px;
+}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid #2b3a55;
+  background:rgba(24,38,62,.65);border-radius:999px;color:#2db8dd;font-size:12px;font-weight:600;
+}
+.hero h1{
+  font-size:58px;line-height:1.03;letter-spacing:-2.6px;max-width:650px;margin:22px 0 14px;
+}
+.hero p{font-size:15px;line-height:1.7;color:#9db0cb;max-width:610px}
+.actions{display:flex;gap:12px;margin-top:30px}
+.primary,.secondary{
+  border-radius:15px;padding:12px 20px;border:1px solid var(--border);font-weight:700;
+}
+.primary{color:white;border:0;background:linear-gradient(100deg,#6876f4,#27b8d7)}
+.secondary{color:white;background:#17233a}
+.arrow{font-size:18px;margin-left:6px}
+.preview{
+  background:linear-gradient(145deg,rgba(27,40,65,.98),rgba(20,31,52,.98));
+  border:1px solid #2d3b56;border-radius:24px;padding:20px;box-shadow:var(--shadow);
+}
+.preview-head{display:flex;justify-content:space-between;align-items:start;margin-bottom:15px}
+.preview-title{font-weight:800}.preview-sub{font-size:12px;color:#91a4c1;margin-top:4px}
+.badge{font-size:11px;padding:6px 11px;border-radius:999px;border:1px solid rgba(34,197,139,.4);color:#4ce1ad;background:rgba(34,197,139,.07)}
+.mini-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini-card{padding:17px;border:1px solid #30405a;border-radius:20px;background:#19263d}
+.mini-icon{color:#27c4e5;font-size:18px}
+.mini-value{font-size:24px;font-weight:800;margin-top:13px}
+.mini-label{font-size:11px;color:#91a5c2;margin-top:4px}
+.shipments{margin-top:18px;display:grid;gap:10px}
+.shipment{padding:12px;border:1px solid #30405a;border-radius:20px;display:flex;justify-content:space-between;align-items:center}
+.shipment strong{font-size:13px}.shipment small{display:block;color:#94a7c3;margin-top:4px}
+.ship-status{font-size:11px;color:#b7c5da}
+.status-danger{color:#ff7580}.status-ok{color:#4bdcab}
+
+/* App */
+.app{display:none;min-height:100vh}
+.app.active{display:flex}
+.sidebar{
+  width:245px;flex:none;border-right:1px solid #23324c;background:#0e172b;padding:22px 15px;
+  display:flex;flex-direction:column;
+}
+.side-brand{padding:4px 10px 25px}
+.nav{display:grid;gap:6px}
+.nav button{
+  width:100%;border:0;background:transparent;color:#8fa2bd;text-align:left;padding:12px 13px;border-radius:12px;
+  display:flex;align-items:center;gap:10px;font-weight:600;
+}
+.nav button:hover,.nav button.active{background:#1a2942;color:white}
+.nav button.active{box-shadow:inset 3px 0 #39bddc}
+.side-bottom{margin-top:auto;border-top:1px solid #24324a;padding-top:15px}
+.user{display:flex;align-items:center;gap:10px;padding:10px}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6877f5,#28b8d8);font-weight:800}
+.user small{display:block;color:#7f94b1;margin-top:2px}
+.logout{margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1px solid #2b3952;background:transparent;color:#a9b9ce}
+.main{flex:1;min-width:0}
+.main-header{
+  height:78px;border-bottom:1px solid #23324c;display:flex;align-items:center;justify-content:space-between;
+  padding:0 30px;background:rgba(13,20,40,.72);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10;
+}
+.header-title{font-size:17px;font-weight:800}.header-sub{font-size:12px;color:#8295b0;margin-top:3px}
+.header-actions{display:flex;align-items:center;gap:10px}
+.security-pill{padding:7px 11px;border-radius:999px;background:rgba(34,197,139,.08);border:1px solid rgba(34,197,139,.25);color:#45d9a5;font-size:11px}
+.icon-btn{border:1px solid #2b3952;background:#17243a;color:#b8c7da;border-radius:10px;width:36px;height:36px}
+.content{padding:28px 30px;max-width:1400px;margin:auto}
+.page{display:none}.page.active{display:block}
+.page-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:22px}
+.page-heading h2{margin:0;font-size:25px}.page-heading p{margin:5px 0 0;color:#8ea2be;font-size:13px}
+.filters{display:flex;gap:8px}
+select{background:#17243a;border:1px solid #2b3952;color:#cbd7e7;border-radius:10px;padding:9px 12px;outline:none}
+.grid-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.card{background:linear-gradient(145deg,#17243b,#142139);border:1px solid #2a3953;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.10)}
+.kpi-top{display:flex;justify-content:space-between;color:#8da1bd;font-size:12px}
+.kpi-icon{color:#2dbbdd}.kpi-value{font-size:28px;font-weight:850;margin-top:10px}.kpi-change{font-size:11px;margin-top:6px;color:#43d6a3}
+.dashboard-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;margin-top:14px}
+.card-title{font-size:14px;font-weight:800}.card-sub{font-size:11px;color:#8295b0;margin-top:4px}
+.chart-wrap{height:270px;margin-top:14px;position:relative}
+canvas{width:100%;height:100%}
+.bar-list{display:grid;gap:16px;margin-top:22px}
+.bar-row{display:grid;grid-template-columns:105px 1fr 48px;gap:10px;align-items:center;font-size:12px}
+.bar-bg{height:8px;border-radius:10px;background:#26344e;overflow:hidden}.bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#6977f4,#2bb9d9)}
+.table-card{margin-top:14px;overflow:hidden}.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #26354f;white-space:nowrap}th{color:#8397b4;font-weight:600}td{color:#d3ddea}.trend-up{color:#45d6a3}.trend-down{color:#ff737e}
+.tag{padding:5px 8px;border-radius:999px;font-size:10px;font-weight:700}.tag-green{background:rgba(34,197,139,.1);color:#45d6a3}.tag-yellow{background:rgba(245,184,75,.1);color:#f5c86e}.tag-red{background:rgba(239,102,117,.1);color:#ff7883}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.insight{padding:15px;border:1px solid #2b3953;border-radius:14px;background:#16233a}.insight-head{display:flex;justify-content:space-between;font-size:12px;font-weight:800}.insight p{font-size:12px;line-height:1.6;color:#95a7c1;margin-bottom:0}
+.chat{max-width:920px;margin:auto}.chat-window{min-height:430px;display:flex;flex-direction:column;gap:12px;padding:20px;background:#121e34;border:1px solid #2a3953;border-radius:18px}
+.msg{max-width:75%;padding:13px 15px;border-radius:14px;font-size:13px;line-height:1.6}.bot{background:#1a2942;border:1px solid #2b3b56;color:#d8e2ef}.me{background:linear-gradient(100deg,#5868e9,#289fbd);align-self:flex-end;color:white}
+.chat-input{display:flex;gap:8px;margin-top:10px}.chat-input input{flex:1;background:#17243a;border:1px solid #2b3953;color:white;border-radius:12px;padding:13px;outline:none}.send{border:0;border-radius:12px;padding:0 18px;background:#6575f3;color:white;font-weight:700}
+.security-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.security-card{min-height:120px}.secure-status{font-size:12px;color:#47d8a5;margin-top:12px}
+.alert{padding:14px;border-radius:12px;background:rgba(245,184,75,.06);border:1px solid rgba(245,184,75,.25);color:#e8c477;font-size:12px;margin-top:14px}
+.data-actions{display:flex;gap:8px}.action-btn{border:1px solid #2b3953;background:#17243a;color:#d8e2ef;border-radius:10px;padding:10px 13px}.action-primary{background:linear-gradient(100deg,#6575f3,#2ab5d4);border:0}
+.toast{position:fixed;right:24px;bottom:24px;background:#182740;border:1px solid #33445f;padding:13px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:12px;display:none;z-index:100}
+.toast.show{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:950px){
+  .hero{grid-template-columns:1fr;gap:35px}.hero h1{font-size:48px}
+  .grid-kpi{grid-template-columns:repeat(2,1fr)}.dashboard-grid{grid-template-columns:1fr}
+  .security-grid,.insights{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .topbar{width:calc(100% - 28px)}.hero{width:calc(100% - 28px)}.hero h1{font-size:39px;letter-spacing:-1.7px}
+  .mini-kpis{grid-template-columns:1fr}.sidebar{width:70px;padding:15px 8px}.side-brand .brand-text,.nav span,.user-text,.logout{display:none}
+  .side-brand{padding:4px 7px 22px}.nav button{justify-content:center;padding:12px 5px}.nav button.active{box-shadow:inset 0 -3px #39bddc}
+  .main-header{padding:0 15px}.content{padding:20px 15px}.grid-kpi{grid-template-columns:1fr 1fr}
+  .filters{display:none}.security-pill{display:none}
+}
+</style>
+</head>
+<body>
+
+<section class="landing" id="landing">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🚚</div>
+      <div><strong>LogiFlow</strong><span>Controle logístico</span></div>
+    </div>
+    <button class="login-btn" onclick="openApp()">Entrar</button>
+  </header>
+
+  <main class="hero">
+    <div>
+      <div class="pill">🛡️ Operação por perfil e empresa</div>
+      <h1>LogiFlow para entregas, fretes e frota em um só painel.</h1>
+      <p>Acesse a visão executiva, acompanhe atrasos, compare transportadoras e mantenha rastreabilidade das ações críticas.</p>
+      <div class="actions">
+        <button class="primary" onclick="openApp()">Acessar painel <span class="arrow">→</span></button>
+        <button class="secondary" onclick="openApp()">Ver dashboard</button>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="preview-head">
+        <div><div class="preview-title">Visão Geral</div><div class="preview-sub">Últimos 90 dias</div></div>
+        <div class="badge">Dentro da meta</div>
+      </div>
+      <div class="mini-kpis">
+        <div class="mini-card"><div class="mini-icon">▥</div><div class="mini-value">94,2%</div><div class="mini-label">OTD operacional</div></div>
+        <div class="mini-card"><div class="mini-icon">♧</div><div class="mini-value">128</div><div class="mini-label">Entregas ativas</div></div>
+        <div class="mini-card"><div class="mini-icon">▱</div><div class="mini-value">42</div><div class="mini-label">Frota monitorada</div></div>
+      </div>
+      <div class="shipments">
+        <div class="shipment"><div><strong>PED-10264</strong><small>Salvador → Recife</small></div><span class="ship-status">Em trânsito</span></div>
+        <div class="shipment"><div><strong>PED-10262</strong><small>São Paulo → Curitiba</small></div><span class="ship-status status-ok">Entregue</span></div>
+        <div class="shipment"><div><strong>PED-10257</strong><small>Belo Horizonte → Vitória</small></div><span class="ship-status status-danger">Atrasado</span></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<section class="app" id="app">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <div class="brand">
+        <div class="brand-icon">🚚</div>
+        <div class="brand-text"><strong>LogiFlow</strong><span>Controle logístico</span></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="active" data-page="dashboard"><span>▦</span><span>Dashboard</span></button>
+      <button data-page="deliveries"><span>↗</span><span>Entregas</span></button>
+      <button data-page="fleet"><span>▱</span><span>Frota</span></button>
+      <button data-page="carriers"><span>♧</span><span>Transportadoras</span></button>
+      <button data-page="security"><span>♢</span><span>Segurança</span></button>
+      <button data-page="data"><span>▤</span><span>Dados</span></button>
+    </nav>
+    <div class="side-bottom">
+      <div class="user"><div class="avatar">CS</div><div class="user-text"><strong style="font-size:12px">Camila Silva</strong><small>Administrador</small></div></div>
+      <button class="logout" onclick="closeApp()">Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="main-header">
+      <div><div class="header-title" id="headerTitle">Dashboard</div><div class="header-sub" id="headerSub">Visão executiva da operação</div></div>
+      <div class="header-actions"><div class="security-pill">● Sistema protegido</div><button class="icon-btn" onclick="notify('Você não possui novas notificações.')">♧</button><div class="avatar">CS</div></div>
+    </header>
+
+    <main class="content">
+
+      <section class="page active" id="dashboard">
+        <div class="page-heading">
+          <div><h2>Visão geral</h2><p>Indicadores operacionais dos últimos 90 dias.</p></div>
+          <div class="filters"><select><option>Últimos 90 dias</option><option>Últimos 30 dias</option><option>Este ano</option></select><select><option>Todas as regiões</option><option>Nordeste</option><option>Sudeste</option></select></div>
+        </div>
+        <div class="grid-kpi">
+          <div class="card"><div class="kpi-top"><span>OTD operacional</span><span class="kpi-icon">▥</span></div><div class="kpi-value">94,2%</div><div class="kpi-change">↑ 3,4% vs. período anterior</div></div>
+          <div class="card"><div class="kpi-top"><span>Entregas ativas</span><span class="kpi-icon">↗</span></div><div class="kpi-value">128</div><div class="kpi-change">↑ 8,2% vs. período anterior</div></div>
+          <div class="card"><div class="kpi-top"><span>Frota monitorada</span><span class="kpi-icon">▱</span></div><div class="kpi-value">42</div><div class="kpi-change">98% com rastreio ativo</div></div>
+          <div class="card"><div class="kpi-top"><span>Atrasos</span><span class="kpi-icon">!</span></div><div class="kpi-value">7</div><div class="kpi-change trend-down">↓ 12,5% vs. período anterior</div></div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card"><div class="card-title">Performance de entregas</div><div class="card-sub">Entregas no prazo x atrasadas</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div>
+          <div class="card"><div class="card-title">Status da operação</div><div class="card-sub">Distribuição das entregas ativas</div>
+            <div class="bar-list">
+              <div class="bar-row"><span>Em trânsito</span><div class="bar-bg"><div class="bar-fill" style="width:72%"></div></div><b>72%</b></div>
+              <div class="bar-row"><span>Agendada</span><div class="bar-bg"><div class="bar-fill" style="width:46%"></div></div><b>46%</b></div>
+              <div class="bar-row"><span>Entregue</span><div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div><b>88%</b></div>
+              <div class="bar-row"><span>Atrasada</span><div class="bar-bg"><div class="bar-fill" style="width:14%;background:linear-gradient(90deg,#ef6675,#f5a25e)"></div></div><b>14%</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-title">Entregas críticas</div><div class="card-sub">Pedidos que merecem atenção operacional</div>
+          <div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Origem</th><th>Destino</th><th>Transportadora</th><th>Status</th><th>Previsão</th></tr></thead>
+          <tbody>
+            <tr><td><strong>PED-10264</strong></td><td>Salvador</td><td>Recife</td><td>TransLog</td><td><span class="tag tag-yellow">Em trânsito</span></td><td>25/09</td></tr>
+            <tr><td><strong>PED-10257</strong></td><td>Belo Horizonte</td><td>Vitória</td><td>RotaSul</td><td><span class="tag tag-red">Atrasado</span></td><td>23/09</td></tr>
+            <tr><td><strong>PED-10241</strong></td><td>São Paulo</td><td>Curitiba</td><td>Expresso BR</td><td><span class="tag tag-green">Entregue</span></td><td>24/09</td></tr>
+          </tbody></table></div>
+        </div>
+
+        <div class="insights">
+          <div class="insight"><div class="insight-head"><span>💡 Oportunidade</span><span class="tag tag-green">IA</span></div><p>Salvador → Recife apresenta OTD de 97% e pode servir como referência para outras rotas.</p></div>
+          <div class="insight"><div class="insight-head"><span>⚠️ Atenção</span><span class="tag tag-yellow">IA</span></div><p>A rota Belo Horizonte → Vitória concentra 3 dos 7 atrasos atuais.</p></div>
+          <div class="insight"><div class="insight-head"><span>🛡️ Segurança</span><span class="tag tag-green">Ativa</span></div><p>Controle por perfil e registro de atividades estão habilitados para a operação.</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="deliveries">
+        <div class="page-heading"><div><h2>Entregas</h2><p>Acompanhe pedidos e status da operação.</p></div><button class="action-btn action-primary" onclick="notify('Nova entrega criada no ambiente de demonstração.')">+ Nova entrega</button></div>
+        <div class="card table-card" style="margin-top:0"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Origem</th><th>Destino</th><th>Data</th><th>Transportadora</th><th>Status</th></tr></thead><tbody>
+          <tr><td>PED-10264</td><td>Salvador</td><td>Recife</td><td>25/09/2026</td><td>TransLog</td><td><span class="tag tag-yellow">Em trânsito</span></td></tr>
+          <tr><td>PED-10262</td><td>São Paulo</td><td>Curitiba</td><td>24/09/2026</td><td>Expresso BR</td><td><span class="tag tag-green">Entregue</span></td></tr>
+          <tr><td>PED-10257</td><td>Belo Horizonte</td><td>Vitória</td><td>23/09/2026</td><td>RotaSul</td><td><span class="tag tag-red">Atrasado</span></td></tr>
+          <tr><td>PED-10252</td><td>Recife</td><td>Fortaleza</td><td>25/09/2026</td><td>NordCargo</td><td><span class="tag tag-yellow">Em trânsito</span></td></tr>
+          <tr><td>PED-10244</td><td>Brasília</td><td>Goiânia</td><td>25/09/2026</td><td>TransLog</td><td><span class="tag tag-green">Entregue</span></td></tr>
+        </tbody></table></div></div>
+      </section>
+
+      <section class="page" id="fleet">
+        <div class="page-heading"><div><h2>Frota</h2><p>Monitoramento dos veículos ativos.</p></div></div>
+        <div class="grid-kpi"><div class="card"><div class="kpi-top"><span>Veículos ativos</span><span class="kpi-icon">▱</span></div><div class="kpi-value">42</div></div><div class="card"><div class="kpi-top"><span>Em rota</span><span class="kpi-icon">↗</span></div><div class="kpi-value">31</div></div><div class="card"><div class="kpi-top"><span>Disponíveis</span><span class="kpi-icon">✓</span></div><div class="kpi-value">8</div></div><div class="card"><div class="kpi-top"><span>Manutenção</span><span class="kpi-icon">⚙</span></div><div class="kpi-value">3</div></div></div>
+        <div class="card table-card"><div class="card-title">Veículos monitorados</div><div class="table-wrap"><table><thead><tr><th>Veículo</th><th>Placa</th><th>Motorista</th><th>Rota</th><th>Status</th></tr></thead><tbody>
+          <tr><td>Truck 014</td><td>ABC-1D23</td><td>João Alves</td><td>Salvador → Recife</td><td><span class="tag tag-green">Em rota</span></td></tr>
+          <tr><td>Van 022</td><td>DEF-4G56</td><td>Maria Lima</td><td>São Paulo → Curitiba</td><td><span class="tag tag-green">Em rota</span></td></tr>
+          <tr><td>Truck 031</td><td>GHI-7J89</td><td>Carlos Souza</td><td>Belo Horizonte → Vitória</td><td><span class="tag tag-yellow">Atenção</span></td></tr>
+        </tbody></table></div></div>
+      </section>
+
+      <section class="page" id="carriers">
+        <div class="page-heading"><div><h2>Transportadoras</h2><p>Compare indicadores de desempenho.</p></div></div>
+        <div class="card table-card" style="margin-top:0"><div class="table-wrap"><table><thead><tr><th>Transportadora</th><th>Entregas</th><th>OTD</th><th>Atrasos</th><th>Status</th></tr></thead><tbody>
+          <tr><td>TransLog</td><td>412</td><td class="trend-up">97,1%</td><td>4</td><td><span class="tag tag-green">Dentro da meta</span></td></tr>
+          <tr><td>Expresso BR</td><td>386</td><td class="trend-up">95,8%</td><td>6</td><td><span class="tag tag-green">Dentro da meta</span></td></tr>
+          <tr><td>NordCargo</td><td>294</td><td>92,4%</td><td>11</td><td><span class="tag tag-yellow">Atenção</span></td></tr>
+          <tr><td>RotaSul</td><td>251</td><td class="trend-down">88,9%</td><td>18</td><td><span class="tag tag-red">Abaixo da meta</span></td></tr>
+        </tbody></table></div></div>
+      </section>
+
+      <section class="page" id="security">
+        <div class="page-heading"><div><h2>Central de Segurança</h2><p>Controles de acesso e rastreabilidade da operação.</p></div><span class="security-pill">● Sistema protegido</span></div>
+        <div class="security-grid">
+          <div class="card security-card"><div class="card-title">🔐 Autenticação</div><p class="card-sub">Controle de acesso à aplicação.</p><div class="secure-status">● Ativa</div></div>
+          <div class="card security-card"><div class="card-title">👥 Perfis de acesso</div><p class="card-sub">Permissões por função.</p><div class="secure-status">● Ativo</div></div>
+          <div class="card security-card"><div class="card-title">📋 Auditoria</div><p class="card-sub">Registro das ações críticas.</p><div class="secure-status">● Ativa</div></div>
+        </div>
+        <div class="alert">⚠️ <strong>Alerta de demonstração:</strong> uma tentativa de acesso fora do perfil foi bloqueada e registrada no histórico.</div>
+        <div class="card table-card"><div class="card-title">Histórico de atividades</div><div class="table-wrap"><table><thead><tr><th>Data/hora</th><th>Usuário</th><th>Ação</th><th>Status</th></tr></thead><tbody>
+          <tr><td>25/09 15:02</td><td>Camila Silva</td><td>Acesso ao Dashboard</td><td><span class="tag tag-green">Sucesso</span></td></tr>
+          <tr><td>25/09 14:57</td><td>Analista</td><td>Consulta de entregas</td><td><span class="tag tag-green">Sucesso</span></td></tr>
+          <tr><td>25/09 14:41</td><td>Usuário externo</td><td>Acesso a dados restritos</td><td><span class="tag tag-red">Bloqueado</span></td></tr>
+        </tbody></table></div></div>
+      </section>
+
+      <section class="page" id="data">
+        <div class="page-heading"><div><h2>Dados</h2><p>Gerencie os dados utilizados pelos indicadores.</p></div><div class="data-actions"><button class="action-btn" onclick="notify('Validação concluída: estrutura compatível.')">Validar dados</button><button class="action-btn action-primary" onclick="notify('Arquivo de demonstração importado com sucesso.')">+ Importar arquivo</button></div></div>
+        <div class="card"><div class="card-title">Dataset operacional</div><div class="card-sub">Base fictícia utilizada no ambiente de avaliação.</div><div class="grid-kpi" style="margin-top:18px"><div><div class="card-sub">Registros</div><div class="kpi-value" style="font-size:22px">2.341</div></div><div><div class="card-sub">Colunas</div><div class="kpi-value" style="font-size:22px">12</div></div><div><div class="card-sub">Última atualização</div><div class="kpi-value" style="font-size:18px">25/09/2026</div></div><div><div class="card-sub">Status</div><div class="secure-status">● Pronto para análise</div></div></div></div>
+        <div class="card table-card"><div class="card-title">Estrutura dos dados</div><div class="table-wrap"><table><thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody>
+          <tr><td>pedido_id</td><td>Texto</td><td>Identificador da entrega</td></tr><tr><td>origem</td><td>Texto</td><td>Cidade de origem</td></tr><tr><td>destino</td><td>Texto</td><td>Cidade de destino</td></tr><tr><td>status</td><td>Categoria</td><td>Status operacional</td></tr><tr><td>data_entrega</td><td>Data</td><td>Data prevista/realizada</td></tr>
+        </tbody></table></div></div>
+      </section>
+
+    </main>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const titles={
+  dashboard:["Dashboard","Visão executiva da operação"],
+  deliveries:["Entregas","Acompanhamento de pedidos e status"],
+  fleet:["Frota","Monitoramento dos veículos"],
+  carriers:["Transportadoras","Desempenho dos parceiros logísticos"],
+  security:["Segurança","Controles de acesso e auditoria"],
+  data:["Dados","Gestão da base operacional"]
+};
+
+function openApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('active');
+  setTimeout(drawChart,50);
+}
+function closeApp(){
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('landing').style.display='flex';
+}
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const page=btn.dataset.page;
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.getElementById(page).classList.add('active');
+    document.getElementById('headerTitle').textContent=titles[page][0];
+    document.getElementById('headerSub').textContent=titles[page][1];
+    if(page==='dashboard') setTimeout(drawChart,30);
+  });
+});
+function notify(message){
+  const t=document.getElementById('toast');
+  t.textContent=message;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function drawChart(){
+  const c=document.getElementById('lineChart'); if(!c) return;
+  const rect=c.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  c.width=rect.width*dpr;c.height=rect.height*dpr;
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+  const values=[84,86,87,85,90,89,92,91,94,93,95,94];
+  const pad={l:35,r:12,t:15,b:30};
+  const iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  ctx.strokeStyle='#2a3953';ctx.lineWidth=1;
+  for(let i=0;i<5;i++){
+    const y=pad.t+ih*i/4;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+  }
+  const pts=values.map((v,i)=>({x:pad.l+iw*i/(values.length-1),y:pad.t+(100-v)/20*ih}));
+  const grad=ctx.createLinearGradient(0,pad.t,0,h);
+  grad.addColorStop(0,'rgba(45,187,218,.28)');grad.addColorStop(1,'rgba(45,187,218,0)');
+  ctx.beginPath();ctx.moveTo(pts[0].x,h-pad.b);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,h-pad.b);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+  ctx.strokeStyle='#39c1df';ctx.lineWidth=3;ctx.stroke();
+  pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,Math.PI*2);ctx.fillStyle='#39c1df';ctx.fill()});
+  ctx.fillStyle='#7f93af';ctx.font='11px Inter, sans-serif';
+  ['Jun','Jul','Ago','Set'].forEach((m,i)=>ctx.fillText(m,pad.l+(iw/3)*i,h-8));
+}
+window.addEventListener('resize',()=>{if(document.getElementById('dashboard').classList.contains('active'))drawChart()});
+</script>
+</body>
+</html>
